@@ -8,6 +8,8 @@ function init(){
   var mouse = {x: 0, y:0};
 
   var polygons = [];
+  var points = [];
+  var lines = [];
 
   var stage = new createjs.Stage(canvas);
 
@@ -23,15 +25,31 @@ function init(){
 
   // start
 
-  var shape = new createjs.Shape();
-
-  var circle = createPoint(canvas.width/2, canvas.height/2);
-
-  stage.update();
-
   function pressMove(event){
     event.target.x = event.stageX;
     event.target.y = event.stageY;
+
+    var position = points.indexOf(event.target);
+    stage.removeChild(lines[position]);
+
+    var temp = points[position+1];
+    if((position+1) % vertexAmount == 0){
+      var temp2 = points[(position+1)-vertexAmount];
+      lines[position] = createLine(event.stageX, event.stageY, temp2.x, temp2.y);
+    }
+    else{
+      lines[position] = createLine(event.stageX, event.stageY, temp.x, temp.y);
+    }
+
+    if(position % vertexAmount == 0){
+      var pos = position-1+vertexAmount;
+      stage.removeChild(lines[pos]);
+      lines[pos] = createLine(points[pos].x, points[pos].y, event.stageX, event.stageY);
+    }
+    else{
+      stage.removeChild(lines[position-1]);
+      lines[position-1] = createLine(points[position-1].x, points[position-1].y, event.stageX, event.stageY);
+    }
 
     stage.clear();
     stage.update();
@@ -49,18 +67,28 @@ function init(){
     var poly = new Polygon();
     poly.center = {x: x, y: y};
 
-    poly.points.push(createPoint(poly.center.x + 150 * Math.cos(0), poly.center.y + 150 * Math.sin(0)));
+    var p1 = createPoint(poly.center.x + 150 * Math.cos(0), poly.center.y + 150 * Math.sin(0));
+
+    poly.points.push(p1);
+    points.push(p1);
 
     for(var i = 1; i < vertexAmount; i++){
-      poly.points.push(createPoint(poly.center.x + 150 * Math.cos(i * 2 * Math.PI / vertexAmount), poly.center.y + 150 * Math.sin(i * 2 * Math.PI / vertexAmount)));
+      var pn = createPoint(poly.center.x + 150 * Math.cos(i * 2 * Math.PI / vertexAmount), poly.center.y + 150 * Math.sin(i * 2 * Math.PI / vertexAmount));
+
+      poly.points.push(pn);
+      points.push(pn);
     }
 
     for(i = 0; i < vertexAmount; i++){
       if(i+1 < vertexAmount){
-        poly.lines.push(createLine(poly.points[i].x, poly.points[i].y, poly.points[i+1].x, poly.points[i+1].y));
+        var l1 = createLine(poly.points[i].x, poly.points[i].y, poly.points[i+1].x, poly.points[i+1].y);
+
+        lines.push(l1);
       }
       else{
-        poly.lines.push(createLine(poly.points[i].x, poly.points[i].y, poly.points[0].x, poly.points[0].y));
+        var l2 = createLine(poly.points[i].x, poly.points[i].y, poly.points[0].x, poly.points[0].y);
+
+        lines.push(l2);
       }
     }
 
@@ -87,6 +115,8 @@ function init(){
     shape.graphics.lineTo(ex, ey);
     shape.graphics.endStroke();
     stage.addChild(shape);
+
+    return shape;
   }
 
   function updateLine(bx, by, ex, ey){
@@ -98,7 +128,6 @@ function init(){
 function Polygon(){
   this.center;
   this.points = [];
-  this.lines = [];
 }
 
 function Point(x, y){
