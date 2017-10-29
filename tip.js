@@ -23,18 +23,17 @@ function init(){
 
   // start
 
+  var shape = new createjs.Shape();
 
   var circle = createPoint(canvas.width/2, canvas.height/2);
-  console.log(circle);
-  circle.x = canvas.width/2;
-  circle.y = canvas.height/2;
-  stage.addChild(circle);
 
   stage.update();
 
   function pressMove(event){
     event.target.x = event.stageX;
     event.target.y = event.stageY;
+
+    stage.clear();
     stage.update();
   }
 
@@ -43,40 +42,48 @@ function init(){
     mouse.y = event.offsetY || (event.layerY - canvas.offsetTop);
 
     createPolygon(mouse.x, mouse.y);
-    console.log(mouse.x + ", " + mouse.y);
     return;
   }
 
   function createPolygon(x, y){
     var poly = new Polygon();
-    poly.center = new Point(x, y);
+    poly.center = {x: x, y: y};
 
-    var p1 = createPoint(poly.center.x + 150 * Math.cos(0), poly.center.y + 150 * Math.sin(0));
-    console.log("p1: "+p1);
-    poly.points.push(p1);
+    poly.points.push(createPoint(poly.center.x + 150 * Math.cos(0), poly.center.y + 150 * Math.sin(0)));
 
-    for(i = 1; i < vertexAmount; i++){
-      var pn = createPoint(poly.center.x + 150 * Math.cos(i * 2 * Math.PI / vertexAmount), poly.center.y + 150 * Math.sin(i * 2 * Math.PI / vertexAmount));
-      poly.points.push(pn);
+    for(var i = 1; i < vertexAmount; i++){
+      poly.points.push(createPoint(poly.center.x + 150 * Math.cos(i * 2 * Math.PI / vertexAmount), poly.center.y + 150 * Math.sin(i * 2 * Math.PI / vertexAmount)));
+
+      console.log("poly.points: " + poly.points[i]);
     }
+
     polygons.push(poly);
-    console.log("poly.points: " + poly.points);
 
     stage.update();
-
-    // renderPoints();
-    // animate();
   }
 
   function createPoint(centerX, centerY){
     var point = new createjs.Shape();
     point.on("pressmove", pressMove);
-    point.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, 7);
+    point.graphics.beginFill("#f2f2f2").drawCircle(0, 0, 7);
     point.x = centerX;
     point.y = centerY;
-    stage.update();
-    console.log("chegou aqui:\n" + centerX + ", " + centerY + "\n" + point);
+    stage.addChild(point);
     return point;
+  }
+
+  function createLine(bx, by, ex, ey){
+    var shape = new createjs.Shape();
+
+    shape.graphics.setStrokeStyle(2).beginStroke("#F2F2F2");
+    shape.graphics.moveTo(bx, by);
+    shape.graphics.lineTo(ex, ey);
+    shape.graphics.endStroke();
+    stage.addChild(shape);
+  }
+
+  function updateLine(bx, by, ex, ey){
+
   }
 
 }
@@ -84,6 +91,7 @@ function init(){
 function Polygon(){
   this.center;
   this.points = [];
+  this.lines = [];
 }
 
 function Point(x, y){
