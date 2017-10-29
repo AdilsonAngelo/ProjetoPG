@@ -53,8 +53,15 @@ function init(){
 
     for(var i = 1; i < vertexAmount; i++){
       poly.points.push(createPoint(poly.center.x + 150 * Math.cos(i * 2 * Math.PI / vertexAmount), poly.center.y + 150 * Math.sin(i * 2 * Math.PI / vertexAmount)));
+    }
 
-      console.log("poly.points: " + poly.points[i]);
+    for(i = 0; i < vertexAmount; i++){
+      if(i+1 < vertexAmount){
+        poly.lines.push(createLine(poly.points[i].x, poly.points[i].y, poly.points[i+1].x, poly.points[i+1].y));
+      }
+      else{
+        poly.lines.push(createLine(poly.points[i].x, poly.points[i].y, poly.points[0].x, poly.points[0].y));
+      }
     }
 
     polygons.push(poly);
@@ -75,7 +82,7 @@ function init(){
   function createLine(bx, by, ex, ey){
     var shape = new createjs.Shape();
 
-    shape.graphics.setStrokeStyle(2).beginStroke("#F2F2F2");
+    shape.graphics.setStrokeStyle(1).beginStroke("#F2F2F2");
     shape.graphics.moveTo(bx, by);
     shape.graphics.lineTo(ex, ey);
     shape.graphics.endStroke();
