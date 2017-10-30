@@ -15,11 +15,13 @@ function init(){
 
   var vertexAmount = parseInt(prompt("Insert amount of vertex:", 3));
 
-  while(vertexAmount > 12 || vertexAmount < 3 || vertexAmount == null || isNaN(vertexAmount)){
+  while(vertexAmount > 51 || vertexAmount < 3 || vertexAmount == null || isNaN(vertexAmount)){
 
     vertexAmount = parseInt(prompt("Invalid amount of vertex, please insert again\n(Must be between 3 and 12)", 3));
 
   }
+
+  createPolygon(canvas.width/4, canvas.height/2);
 
   // Get polygons
 
@@ -59,7 +61,12 @@ function init(){
     mouse.x = event.offsetX || (event.layerX - canvas.offsetLeft);
     mouse.y = event.offsetY || (event.layerY - canvas.offsetTop);
 
-    createPolygon(mouse.x, mouse.y);
+    if(event.target instanceof createjs.Shape){
+      console.log("Denes");
+    }
+    else {
+      createPolygon(mouse.x, mouse.y);
+    }
     return;
   }
 
@@ -67,13 +74,13 @@ function init(){
     var poly = new Polygon();
     poly.center = {x: x, y: y};
 
-    var p1 = createPoint(poly.center.x + 150 * Math.cos(0), poly.center.y + 150 * Math.sin(0));
+    var p1 = createPoint(poly.center.x + 100 * Math.cos(0), poly.center.y + 100 * Math.sin(0));
 
     poly.points.push(p1);
     points.push(p1);
 
     for(var i = 1; i < vertexAmount; i++){
-      var pn = createPoint(poly.center.x + 150 * Math.cos(i * 2 * Math.PI / vertexAmount), poly.center.y + 150 * Math.sin(i * 2 * Math.PI / vertexAmount));
+      var pn = createPoint(poly.center.x + 100 * Math.cos(i * 2 * Math.PI / vertexAmount), poly.center.y + 100 * Math.sin(i * 2 * Math.PI / vertexAmount));
 
       poly.points.push(pn);
       points.push(pn);
@@ -100,7 +107,7 @@ function init(){
   function createPoint(centerX, centerY){
     var point = new createjs.Shape();
     point.on("pressmove", pressMove);
-    point.graphics.beginFill("#f2f2f2").drawCircle(0, 0, 7);
+    point.graphics.beginFill("#f2f2f2").drawCircle(0, 0, 8);
     point.x = centerX;
     point.y = centerY;
     stage.addChild(point);
@@ -108,19 +115,48 @@ function init(){
   }
 
   function createLine(bx, by, ex, ey){
-    var shape = new createjs.Shape();
+    var line = new createjs.Shape();
 
-    shape.graphics.setStrokeStyle(1).beginStroke("#F2F2F2");
-    shape.graphics.moveTo(bx, by);
-    shape.graphics.lineTo(ex, ey);
-    shape.graphics.endStroke();
-    stage.addChild(shape);
-
-    return shape;
+    line.graphics.setStrokeStyle(1).beginStroke("#828282");
+    line.graphics.moveTo(bx, by);
+    line.graphics.lineTo(ex, ey);
+    line.graphics.endStroke();
+    stage.addChild(line);
+    console.log("Dayum, one more line");
+    return line;
   }
 
-  function updateLine(bx, by, ex, ey){
+  function deCasteljau(){
+    for(i=0; i < polygons.length; i++){
+      for(j=0; j < vertexAmount; j++){
 
+      }
+    }
+  }
+
+  var startButton = document.getElementById("start");
+
+  startButton.onclick = function(){
+    // FUNCAO DE INICIAR BEZIER
+  }
+
+  var clearButton = document.getElementById("clear");
+
+  clearButton.onclick = function(){
+    for(i = 0; i < points.length; i++){
+      console.log(stage.removeChild(lines[i]));
+      stage.removeChild(points[i]);
+    }
+    for(i = 0; i < polygons.length; i++){stage.removeChild(polygons[i]);}
+
+    polygons = [];
+    lines = [];
+    points = [];
+
+    createPolygon(canvas.width/4, canvas.height/2);
+
+    stage.clear();
+    stage.update();
   }
 
 }
