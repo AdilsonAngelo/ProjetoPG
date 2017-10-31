@@ -8,6 +8,7 @@ function init(){
   var mouse = {x: 0, y:0};
 
   var started = false;
+  var hidden = false;
   var red = 130, green = 130, blue = 130;
 
   var polygons = [];
@@ -27,9 +28,6 @@ function init(){
 
   // var tenes = ['denes', 'tenes', 'penes', 'menes'];
   // console.log(tenes[tenes.length-1]);
-  for(let pinto of bezier(0,0)){
-    console.log(pinto);
-  }
 
   createPolygon(canvas.width/4, canvas.height/2);
 
@@ -71,10 +69,7 @@ function init(){
     mouse.x = event.offsetX || (event.layerX - canvas.offsetLeft);
     mouse.y = event.offsetY || (event.layerY - canvas.offsetTop);
 
-    if(event.target instanceof createjs.Shape){
-      console.log("Denes");
-    }
-    else {
+    if(!started){
       createPolygon(mouse.x, mouse.y);
     }
     return;
@@ -127,23 +122,25 @@ function init(){
   function createLine(bx, by, ex, ey){
     var line = new createjs.Shape();
     var grossura = 1;
+
     if(started){
       grossura = 2;
-      var max = 255, min = 80;
+    }
 
-      if(red == max && green == min && blue < max){
-        blue+=5;
-      }else if(red > min && green == min && blue == max){
-        red-=5;
-      }else if(red == min && green < max && blue == max){
-        green+=5;
-      }else if(red == min && green == max && blue > min){
-        blue-=5;
-      }else if(red < max && green == max && blue == min){
-        red+=5;
-      }else if(red == max && green > min && blue == min){
-        green-=5;
-      }
+    var max = 255, min = 80;
+
+    if(red == max && green == min && blue < max){
+      blue+=5;
+    }else if(red > min && green == min && blue == max){
+      red-=5;
+    }else if(red == min && green < max && blue == max){
+      green+=5;
+    }else if(red == min && green == max && blue > min){
+      blue-=5;
+    }else if(red < max && green == max && blue == min){
+      red+=5;
+    }else if(red == max && green > min && blue == min){
+      green-=5;
     }
 
     line.graphics.setStrokeStyle(grossura).beginStroke("rgba("+red+", "+green+", "+blue+", 1)");
@@ -180,12 +177,7 @@ function init(){
     var res = [];
 
     for(var i = 0; i <= numDC; i++){
-      console.log(b);
       res.push(deCasteljau(b, (i/numDC)));
-    }
-
-    for(var i = 0; i < res.length; i++){
-      console.log(res[i]);
     }
 
     return res;
@@ -208,7 +200,7 @@ function init(){
       numDC = parseInt(prompt("ENTRADA INVÁLIDA\nNúmero de avaliações que a curva deve ter:\n(min: 10 - max: 150)", 50));
     }
 
-    var bazierCurves = [];
+    var bezierCurves = [];
     for(var i = 0; i < polygons.length; i++){
       tempi = [];
       for(var j = 0; j < vertexAmount; j++){
@@ -218,13 +210,18 @@ function init(){
       bezierCurves.push(tempi);
     }
 
+    hidePoints();
+
+
+    animate(bezierCurves);
+
   }
 
   var clearButton = document.getElementById("clear");
 
   clearButton.onclick = function(){
     for(var i = 0; i < points.length; i++){
-      console.log(stage.removeChild(lines[i]));
+      stage.removeChild(lines[i]);
       stage.removeChild(points[i]);
     }
     for(var i = 0; i < polygons.length; i++){stage.removeChild(polygons[i]);}
@@ -237,6 +234,26 @@ function init(){
 
     stage.clear();
     stage.update();
+  }
+
+  var hideButton = document.getElementById("hide");
+
+  hideButton.onclick = function hidePoints(){
+    for(let point of points){
+      if(hidden){
+        stage.addChild(point);
+      }else {
+        stage.removeChild(point);
+      }
+    }
+    hidden = !hidden;
+    stage.clear();
+    stage.update();
+    console.log(points.length);
+  }
+
+  function animate(curves){
+
   }
 
 }
