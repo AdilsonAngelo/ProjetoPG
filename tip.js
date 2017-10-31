@@ -7,9 +7,13 @@ function init(){
 
   var mouse = {x: 0, y:0};
 
+  var started = false;
+  var red = 130, green = 130, blue = 130;
+
   var polygons = [];
   var points = [];
   var lines = [];
+  var evaluatedPolys = [];
 
   var stage = new createjs.Stage(canvas);
 
@@ -20,6 +24,10 @@ function init(){
     vertexAmount = parseInt(prompt("Invalid amount of vertex, please insert again\n(Must be between 3 and 12)", 3));
 
   }
+
+  // var tenes = ['denes', 'tenes', 'penes', 'menes'];
+  // console.log(tenes[tenes.length-1]);
+  console.log(bezier(0,0));
 
   createPolygon(canvas.width/4, canvas.height/2);
 
@@ -86,7 +94,7 @@ function init(){
       points.push(pn);
     }
 
-    for(i = 0; i < vertexAmount; i++){
+    for(var i = 0; i < vertexAmount; i++){
       if(i+1 < vertexAmount){
         var l1 = createLine(poly.points[i].x, poly.points[i].y, poly.points[i+1].x, poly.points[i+1].y);
 
@@ -116,8 +124,27 @@ function init(){
 
   function createLine(bx, by, ex, ey){
     var line = new createjs.Shape();
+    var grossura = 1;
+    if(started){
+      grossura = 2;
+      var max = 255, min = 80;
 
-    line.graphics.setStrokeStyle(1).beginStroke("#828282");
+      if(red == max && green == min && blue < max){
+        blue+=5;
+      }else if(red > min && green == min && blue == max){
+        red-=5;
+      }else if(red == min && green < max && blue == max){
+        green+=5;
+      }else if(red == min && green == max && blue > min){
+        blue-=5;
+      }else if(red < max && green == max && blue == min){
+        red+=5;
+      }else if(red == max && green > min && blue == min){
+        green-=5;
+      }
+    }
+
+    line.graphics.setStrokeStyle(grossura).beginStroke("rgba("+red+", "+green+", "+blue+", 1)");
     line.graphics.moveTo(bx, by);
     line.graphics.lineTo(ex, ey);
     line.graphics.endStroke();
@@ -126,28 +153,82 @@ function init(){
     return line;
   }
 
-  function deCasteljau(){
-    for(i=0; i < polygons.length; i++){
-      for(j=0; j < vertexAmount; j++){
+  function deCasteljau(b, t){
 
+    for(var i = 0; b.length > 1; i++){
+      var m = b.shift();
+      var n = b[0];
+
+      b.push({x: (m.x*(1-t) + n.x*t), y: (m.y*(1-t) + n.y*t)});
+      console.log('t = '+(1-t));
+
+      if(i == b.length-2){
+        b.shift();
+        i = -1;
       }
     }
+
+    return b[0];
   }
+
+  function bezier(b, numDC){
+    // var res = [];
+    //
+    // b = [{x: 1, y: 1}, {x: 5, y: 10}, {x: 10, y: 15}, {x: 10, y: 20}];
+    // numDC = 10 ;
+    //
+    // for(var i = 0; i <= numDC; i++){
+    //   var tebes = deCasteljau(b, i/(numDC+1));
+    //   res.push(tebes);
+    //   console.log(tebes);
+    //
+    //   console.log(i/numDC);
+    // }
+    //
+    // for(var i = 0; i < res.length; i++){
+    //   console.log(res[i]);
+    // }
+    //
+    // return res;
+  }
+
+  // function animate(){
+  //
+  // }
 
   var startButton = document.getElementById("start");
 
   startButton.onclick = function(){
     // FUNCAO DE INICIAR BEZIER
+    started = true;
+    red = 255, green = 80, blue = 80;
+
+    var numDC = parseInt(prompt("Número de avaliações que a curva deve ter:\n(min: 10 - max: 120)", 50));
+
+    while(numDC > 120 || numDC < 10 || numDC == null || isNaN(numDC)){
+      numDC = parseInt(prompt("ENTRADA INVÁLIDA\nNúmero de avaliações que a curva deve ter:\n(min: 10 - max: 120)", 50));
+    }
+
+    var bazierCurves = [];
+    for(var i = 0; i < polygons.length; i++){
+      tempi = [];
+      for(var j = 0; j < vertexAmount; j++){
+        tempi.push(polygons[i].points[j]);
+      }
+      tempi = bezier(tempi, numDC);
+      bezierCurves.push(tempi);
+    }
+
   }
 
   var clearButton = document.getElementById("clear");
 
   clearButton.onclick = function(){
-    for(i = 0; i < points.length; i++){
+    for(var i = 0; i < points.length; i++){
       console.log(stage.removeChild(lines[i]));
       stage.removeChild(points[i]);
     }
-    for(i = 0; i < polygons.length; i++){stage.removeChild(polygons[i]);}
+    for(var i = 0; i < polygons.length; i++){stage.removeChild(polygons[i]);}
 
     polygons = [];
     lines = [];
