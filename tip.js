@@ -27,7 +27,9 @@ function init(){
 
   // var tenes = ['denes', 'tenes', 'penes', 'menes'];
   // console.log(tenes[tenes.length-1]);
-  console.log(bezier(0,0));
+  for(let pinto of bezier(0,0)){
+    console.log(pinto);
+  }
 
   createPolygon(canvas.width/4, canvas.height/2);
 
@@ -154,42 +156,39 @@ function init(){
   }
 
   function deCasteljau(b, t){
+    var temp = [];
+    for(var i = 0; i < b.length; i++){
+      temp.push(b[i]);
+    }
 
-    for(var i = 0; b.length > 1; i++){
-      var m = b.shift();
-      var n = b[0];
+    for(var i = 0; temp.length > 1; i++){
+      var m = temp.shift();
+      var n = temp[0];
+      // console.log('m: '+m.x+', '+m.y+' | n: '+n.x+', '+n.y);
 
-      b.push({x: (m.x*(1-t) + n.x*t), y: (m.y*(1-t) + n.y*t)});
-      console.log('t = '+(1-t));
+      temp.push({x: (m.x*(1-t) + n.x*t), y: (m.y*(1-t) + n.y*t)});
 
-      if(i == b.length-2){
-        b.shift();
+      if(i == temp.length-2){
+        temp.shift();
         i = -1;
       }
     }
-
-    return b[0];
+    return temp[0];
   }
 
   function bezier(b, numDC){
-    // var res = [];
-    //
-    // b = [{x: 1, y: 1}, {x: 5, y: 10}, {x: 10, y: 15}, {x: 10, y: 20}];
-    // numDC = 10 ;
-    //
-    // for(var i = 0; i <= numDC; i++){
-    //   var tebes = deCasteljau(b, i/(numDC+1));
-    //   res.push(tebes);
-    //   console.log(tebes);
-    //
-    //   console.log(i/numDC);
-    // }
-    //
-    // for(var i = 0; i < res.length; i++){
-    //   console.log(res[i]);
-    // }
-    //
-    // return res;
+    var res = [];
+
+    for(var i = 0; i <= numDC; i++){
+      console.log(b);
+      res.push(deCasteljau(b, (i/numDC)));
+    }
+
+    for(var i = 0; i < res.length; i++){
+      console.log(res[i]);
+    }
+
+    return res;
   }
 
   // function animate(){
@@ -203,10 +202,10 @@ function init(){
     started = true;
     red = 255, green = 80, blue = 80;
 
-    var numDC = parseInt(prompt("Número de avaliações que a curva deve ter:\n(min: 10 - max: 120)", 50));
+    var numDC = parseInt(prompt("Número de avaliações que a curva deve ter:\n(min: 10 - max: 150)", 50));
 
-    while(numDC > 120 || numDC < 10 || numDC == null || isNaN(numDC)){
-      numDC = parseInt(prompt("ENTRADA INVÁLIDA\nNúmero de avaliações que a curva deve ter:\n(min: 10 - max: 120)", 50));
+    while(numDC > 150 || numDC < 10 || numDC == null || isNaN(numDC)){
+      numDC = parseInt(prompt("ENTRADA INVÁLIDA\nNúmero de avaliações que a curva deve ter:\n(min: 10 - max: 150)", 50));
     }
 
     var bazierCurves = [];
