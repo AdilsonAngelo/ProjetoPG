@@ -9,12 +9,16 @@ function init(){
 
   var started = false;
   var hidden = false;
+  var hiddenCurves = false;
+  var hiddenPolys = false;
   var red = 130, green = 130, blue = 130;
 
   var polygons = [];
   var points = [];
   var lines = [];
   var evaluatedPolys = [];
+
+  var tempBezierLines = [];
 
   var stage = new createjs.Stage(canvas);
 
@@ -26,14 +30,35 @@ function init(){
 
   }
 
-  // var tenes = ['denes', 'tenes', 'penes', 'menes'];
-  // console.log(tenes[tenes.length-1]);
-
   createPolygon(canvas.width/4, canvas.height/2);
 
-  // Get polygons
+  function updateCurves(){
+    for(let line of tempBezierLines){
+      stage.removeChild(line);
+    }
 
-  // start
+    tempBezierLines = [];
+
+    var tempBezierCurves = [];
+
+    for(var i = 0; i < vertexAmount; i++){
+      var tempi = [];
+      for(var j = 0; j < polygons.length; j++){
+        tempi.push(polygons[j].points[i]);
+      }
+      tempi = bezier(tempi, 50);
+      tempBezierCurves.push(tempi);
+    }
+
+    for(let curve of tempBezierCurves){
+      for(var p = 0; p < curve.length-1; p++){
+        tempBezierLines.push(createLine(curve[p].x, curve[p].y,
+          curve[p+1].x, curve[p+1].y));
+      }
+    }
+    stage.clear();
+    stage.update();
+  }
 
   function pressMove(event){
     event.target.x = event.stageX;
@@ -61,9 +86,12 @@ function init(){
       lines[position-1] = createLine(points[position-1].x, points[position-1].y, event.stageX, event.stageY);
     }
 
+    updateCurves();
+
     stage.clear();
     stage.update();
   }
+
 
    function doubleClick(event){
     mouse.x = event.offsetX || (event.layerX - canvas.offsetLeft);
@@ -71,7 +99,10 @@ function init(){
 
     if(!started){
       createPolygon(mouse.x, mouse.y);
+      updateCurves();
     }
+
+
     return;
   }
 
@@ -205,10 +236,7 @@ function init(){
       }
       tempi = bezier(tempi, numDC);
       bezierCurves.push(tempi);
-      console.log("CURVA ADICIONADA");
     }
-
-    console.log(bezierCurves);
 
     if(!hidden){
       hideButton.click();
@@ -216,14 +244,7 @@ function init(){
 
     hideButton.onclick = null;
     clearButton.onclick = null;
-
-    if(!started){
-      for(let curve of bezierCurves){
-        for(var p = 0; p < numDC; p++){
-          createLine(curve[p].x, curve[p].y, curve[p+1].x, curve[p+1].y);
-        }
-      }
-    }
+    doubleClick = null;
 
     stage.clear();
     stage.update();
@@ -301,6 +322,8 @@ function init(){
 
     createPolygon(canvas.width/4, canvas.height/2);
 
+    updateCurves();
+
     stage.clear();
     stage.update();
   }
@@ -318,9 +341,39 @@ function init(){
     hidden = !hidden;
     stage.clear();
     stage.update();
-    console.log(points.length);
   }
 
+  var hideCurvesButton = document.getElementById("hidecurves");
+
+  hideCurvesButton.onclick = function hideCurves(){
+    for(let line of tempBezierLines){
+      if(hiddenCurves){
+        stage.addChild(line);
+      }else{
+        stage.removeChild(line);
+      }
+    }
+
+    hiddenCurves = !hiddenCurves;
+    stage.clear();
+    stage.update();
+  }
+
+  var hidePolysButton = document.getElementById("hidepoly");
+
+  hidePolysButton.onclick = function hidePolys(){
+    for(let line of lines){
+      if(hiddenPolys){
+        stage.addChild(line);
+      }else{
+        stage.removeChild(line);
+      }
+    }
+
+    hiddenPolys = !hiddenPolys;
+    stage.clear();
+    stage.update();
+  }
 
 }
 
