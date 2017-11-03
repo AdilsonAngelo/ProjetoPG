@@ -6,22 +6,19 @@
 	<style type="text/css">
 		canvas{
 			border: 1px solid black;
-			background-color: black;
+			/*background-color: black;*/
 			text: black;
 		}
-
-		body{
-			margin: 0;
-		}
 	</style>
+	<link rel="stylesheet" type="text/css" href="tip.css">
 </head>
 <body onload="init();">
 
-	<a id="start">Start</a><br>
-	<a id="clear">Clear</a><br>
-	<a id="hide">Show/Hide control points</a><br>
-	<a id="hidecurves">Show/Hide Bezier curves</a><br>
-	<a id="hidepoly">Show/Hide polygons</a>
+	<a id="start" class="botao">Start</a><br>
+	<a id="clear" class="botao">Clear</a><br>
+	<a id="hide" class="botao">Show/Hide control points</a><br>
+	<a id="hidecurves" class="botao">Show/Hide Bezier curves</a><br>
+	<a id="hidepoly" class="botao">Show/Hide polygons</a>
 
 	<canvas id="demoCanvas"></canvas>
 
