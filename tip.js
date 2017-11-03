@@ -20,7 +20,7 @@ function init(){
 
   var vertexAmount = parseInt(prompt("Insert amount of vertex:", 3));
 
-  while(vertexAmount > 51 || vertexAmount < 3 || vertexAmount == null || isNaN(vertexAmount)){
+  while(vertexAmount > 12 || vertexAmount < 3 || vertexAmount == null || isNaN(vertexAmount)){
 
     vertexAmount = parseInt(prompt("Invalid amount of vertex, please insert again\n(Must be between 3 and 12)", 3));
 
@@ -124,23 +124,26 @@ function init(){
     var grossura = 1;
 
     if(started){
-      grossura = 2;
+      grossura = 3;
+    }
+    else{
+      red = 130, green = 130, blue = 130;
     }
 
-    var max = 255, min = 80;
+    var max = 255, min = 90;
 
     if(red == max && green == min && blue < max){
-      blue+=5;
+      blue+=3;
     }else if(red > min && green == min && blue == max){
-      red-=5;
+      red-=3;
     }else if(red == min && green < max && blue == max){
-      green+=5;
+      green+=3;
     }else if(red == min && green == max && blue > min){
-      blue-=5;
+      blue-=3;
     }else if(red < max && green == max && blue == min){
-      red+=5;
+      red+=3;
     }else if(red == max && green > min && blue == min){
-      green-=5;
+      green-=3;
     }
 
     line.graphics.setStrokeStyle(grossura).beginStroke("rgba("+red+", "+green+", "+blue+", 1)");
@@ -148,7 +151,7 @@ function init(){
     line.graphics.lineTo(ex, ey);
     line.graphics.endStroke();
     stage.addChild(line);
-    console.log("Dayum, one more line");
+    // console.log("Dayum, one more line");
     return line;
   }
 
@@ -163,7 +166,7 @@ function init(){
       var n = temp[0];
       // console.log('m: '+m.x+', '+m.y+' | n: '+n.x+', '+n.y);
 
-      temp.push({x: (m.x*(1-t) + n.x*t), y: (m.y*(1-t) + n.y*t)});
+      temp.push({x: (m.x*(1-t) + n.x*t).toFixed(4), y: (m.y*(1-t) + n.y*t).toFixed(4)});
 
       if(i == temp.length-2){
         temp.shift();
@@ -183,38 +186,104 @@ function init(){
     return res;
   }
 
-  // function animate(){
-  //
-  // }
-
   var startButton = document.getElementById("start");
 
   startButton.onclick = function(){
     // FUNCAO DE INICIAR BEZIER
-    started = true;
-    red = 255, green = 80, blue = 80;
 
-    var numDC = parseInt(prompt("Número de avaliações que a curva deve ter:\n(min: 10 - max: 150)", 50));
+    var numDC = parseInt(prompt("Número de avaliações que a curva deve ter:\n(min: 20)", 100));
 
-    while(numDC > 150 || numDC < 10 || numDC == null || isNaN(numDC)){
-      numDC = parseInt(prompt("ENTRADA INVÁLIDA\nNúmero de avaliações que a curva deve ter:\n(min: 10 - max: 150)", 50));
+    while(numDC > 1000 || numDC < 20 || numDC == null || isNaN(numDC)){
+      numDC = parseInt(prompt("ENTRADA INVÁLIDA\nNúmero de avaliações que a curva deve ter:\n(min: 20)", 100)) + 1;
     }
 
     var bezierCurves = [];
-    for(var i = 0; i < polygons.length; i++){
-      tempi = [];
-      for(var j = 0; j < vertexAmount; j++){
-        tempi.push(polygons[i].points[j]);
+    for(var i = 0; i < vertexAmount; i++){
+      var tempi = [];
+      for(var j = 0; j < polygons.length; j++){
+        tempi.push(polygons[j].points[i]);
       }
       tempi = bezier(tempi, numDC);
       bezierCurves.push(tempi);
+      console.log("CURVA ADICIONADA");
     }
 
-    hidePoints();
+    console.log(bezierCurves);
 
+    if(!hidden){
+      hideButton.click();
+    }
 
-    animate(bezierCurves);
+    hideButton.onclick = null;
+    clearButton.onclick = null;
 
+    if(!started){
+      for(let curve of bezierCurves){
+        for(var p = 0; p < numDC; p++){
+          createLine(curve[p].x, curve[p].y, curve[p+1].x, curve[p+1].y);
+        }
+      }
+    }
+
+    stage.clear();
+    stage.update();
+
+    started = true;
+    red = 255, green = 90, blue = 90;
+
+    animate(bezierCurves, numDC);
+
+  }
+
+  async function animate(curves, numDC){
+    var linesBezier = [];
+
+    for(var i = 0; i < numDC; i++){
+      for(var j = 0; j < vertexAmount; j++){
+        var rel = 0;
+        if((j+1) % vertexAmount == 0){
+          rel = (j+1)-vertexAmount;
+        }
+        else{
+          rel = j+1;
+        }
+        linesBezier.push(createLine(curves[j][i].x, curves[j][i].y, curves[rel][i].x, curves[rel][i].y));
+        stage.removeChild(linesBezier[linesBezier.length-1]);
+      }
+    }
+
+    for(var pt = 0; pt < vertexAmount; pt++){
+      var rel = 0;
+      if(pt == vertexAmount-1){
+        rel = 0;
+      }else{
+        rel = pt+1;
+      }
+      linesBezier.push(createLine(polygons[polygons.length-1].points[pt].x, polygons[polygons.length-1].points[pt].y, polygons[polygons.length-1].points[rel].x, polygons[polygons.length-1].points[rel].y));
+      stage.removeChild(linesBezier[linesBezier.length-1]);
+    }
+
+    var counter = 0;
+    for(var k = 0; k < linesBezier.length; k++){
+      for(var j = 0; j < vertexAmount; j++){
+        stage.addChild(linesBezier[j+counter]);
+      }
+      stage.clear();
+      stage.update();
+
+      var timeout = 20;
+      if(numDC > 299){timeout = 0;}
+      else if (numDC < 100) {timeout = 60;}
+      await sleep(timeout);
+
+      for(var j = 0; j < vertexAmount; j++){
+        stage.removeChild(linesBezier[j+counter]);
+      }
+      stage.clear();
+      stage.update();
+
+      counter+=vertexAmount;
+    }
   }
 
   var clearButton = document.getElementById("clear");
@@ -252,10 +321,11 @@ function init(){
     console.log(points.length);
   }
 
-  function animate(curves){
 
-  }
+}
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function Polygon(){
