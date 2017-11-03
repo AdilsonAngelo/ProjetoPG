@@ -183,8 +183,8 @@ function init(){
       grossura = 3;
     }
     else{
-    }
       red = 130, green = 130, blue = 130;
+    }
 
     var max = 255, min = 90;
 
