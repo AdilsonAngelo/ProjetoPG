@@ -32,6 +32,11 @@ function init(){
 
   createPolygon(canvas.width/4, canvas.height/2);
 
+/*
+ *    FUNCAO DE ATUALIZACAO DAS CURVAS
+ *    CHAMADA CADA VEZ QUE OCORRE ALGUMA MUDANCA
+ *    QUE AFETE AS CURVAS DE BEZIER DOS POLIGONOS
+ */
   function updateCurves(){
     for(let line of tempBezierLines){
       stage.removeChild(line);
@@ -59,6 +64,10 @@ function init(){
     stage.clear();
     stage.update();
   }
+
+  /*
+   *   MOVER OS PONTOS DE CONTROLE
+   */
 
   function pressMove(event){
     if(!started){
@@ -93,6 +102,9 @@ function init(){
     stage.update();
   }
 
+  /*
+   *   ADICIONAR POLIGONOS
+   */
 
   function doubleClick(event){
     mouse.x = event.offsetX || (event.layerX - canvas.offsetLeft);
@@ -104,6 +116,10 @@ function init(){
     }
     return;
   }
+
+  /*
+   *  CRIAR POLIGONOS
+   */
 
   function createPolygon(x, y){
     if(!started){
@@ -141,6 +157,10 @@ function init(){
     }
   }
 
+  /*
+   * FUNCAO AUXILIAR PARA CRIAR OS PONTOS DE CONTRLE
+   */
+
   function createPoint(centerX, centerY){
     var point = new createjs.Shape();
     point.on("pressmove", pressMove);
@@ -151,6 +171,10 @@ function init(){
     return point;
   }
 
+  /*
+   *  CRIAR LINHAS
+   */
+
   function createLine(bx, by, ex, ey){
     var line = new createjs.Shape();
     var grossura = 1;
@@ -159,8 +183,8 @@ function init(){
       grossura = 3;
     }
     else{
-      red = 130, green = 130, blue = 130;
     }
+      red = 130, green = 130, blue = 130;
 
     var max = 255, min = 90;
 
@@ -183,9 +207,14 @@ function init(){
     line.graphics.lineTo(ex, ey);
     line.graphics.endStroke();
     stage.addChild(line);
-    // console.log("Dayum, one more line");
     return line;
   }
+
+  /*
+   *  FUNCAO DE DECASTELJAU:
+   *  - RECEBE UM ARRAY DE PONTOS DE CONTROLE DE UMA CURVA E UM VALOR DE t
+   *  - RETORNA O PONTO NA CURVA PARA O t DADO
+   */
 
   function deCasteljau(b, t){
     var temp = [];
@@ -196,7 +225,6 @@ function init(){
     for(var i = 0; temp.length > 1; i++){
       var m = temp.shift();
       var n = temp[0];
-      // console.log('m: '+m.x+', '+m.y+' | n: '+n.x+', '+n.y);
 
       temp.push({x: (m.x*(1-t) + n.x*t).toFixed(4), y: (m.y*(1-t) + n.y*t).toFixed(4)});
 
@@ -208,6 +236,12 @@ function init(){
     return temp[0];
   }
 
+  /*
+   *  FUNCAO DE BEZIER:
+   *  - RECEBE UM ARRAY DE PONTOS DE CONTROLE E UM NUMERO DE AVALIACOES DE DECASTELJAU
+   *  - RETORNA UM ARRAY DE PONTOS DA CURVA PARA O NUMERO DE AVALIACOES DADO
+   */
+
   function bezier(b, numDC){
     var res = [];
 
@@ -218,10 +252,14 @@ function init(){
     return res;
   }
 
+  /*
+   *  BOTAO START:
+   *  PROCEDIMENTO DE INICALIZACAO DA ANIMACAO
+   */
+
   var startButton = document.getElementById("start");
 
   startButton.onclick = function(){
-    // FUNCAO DE INICIAR BEZIER
 
     var numDC = parseInt(prompt("Número de avaliações que a curva deve ter:\n(min: 20)", 100));
 
@@ -259,6 +297,10 @@ function init(){
     red = 130, green = 130, blue = 130;
 
   }
+
+  /*
+   *  FUNCAO DE ANIMACAO
+   */
 
   async function animate(curves, numDC){
     var linesBezier = [];
@@ -298,9 +340,11 @@ function init(){
 
       var timeout = 10;
       if(numDC > 299){timeout = 0;}
-      else if (numDC < 100) {timeout = 30;}
+      else if (numDC < 100) {timeout = 50;}
       await sleep(timeout);
 
+
+      /*  PARA MAIS EFEITOS VISUAIS COMENTAR AS 3 LINHAS SEGUINTES  */
       for(var j = 0; j < vertexAmount; j++){
         stage.removeChild(linesBezier[j+counter]);
       }
@@ -311,32 +355,37 @@ function init(){
     }
   }
 
+  /*
+   *  BOTAO CLEAR:
+   *  PROCEDIMENTO DE LIMPEZA DA TELA
+   */
+
   var clearButton = document.getElementById("clear");
 
   clearButton.onclick = function(){
     if(!started){
-      for(var i = 0; i < points.length; i++){
-        stage.removeChild(lines[i]);
-        stage.removeChild(points[i]);
-      }
-      for(var i = 0; i < polygons.length; i++){stage.removeChild(polygons[i]);}
-
+      stage.removeAllChildren();
       polygons = [];
       lines = [];
       points = [];
 
-      createPolygon(canvas.width/4, canvas.height/2);
 
       hiddenPolys = false;
       hiddenCurves = false;
       hidden = false;
 
-      updateCurves();
+      // createPolygon(canvas.width/4, canvas.height/2);
+      // updateCurves();
 
       stage.clear();
       stage.update();
     }
   }
+
+  /*
+   *  BOTAO HIDE:
+   *  PROCEDIMENTO MOSTRAR/ESCONDER PONTOS DE CONTROLE
+   */
 
   var hideButton = document.getElementById("hide");
 
@@ -353,6 +402,11 @@ function init(){
     stage.update();
   }
 
+  /*
+   *  BOTAO HIDECURVES:
+   *  PROCEDIMENTO MOSTRAR/ESCONDER CURVAS DE BEZIER
+   */
+
   var hideCurvesButton = document.getElementById("hidecurves");
 
   hideCurvesButton.onclick = function hideCurves(){
@@ -368,6 +422,11 @@ function init(){
     stage.clear();
     stage.update();
   }
+
+  /*
+   *  BOTAO HIDEPOLYS:
+   *  PROCEDIMENTO MOSTRAR/ESCONDER POLIGONOS
+   */
 
   var hidePolysButton = document.getElementById("hidepoly");
 
@@ -386,6 +445,10 @@ function init(){
   }
 
 }
+
+/*
+ *  FUNCAO SLEEP PARA CONTROLAR TEMPO DE EXIBICAO DOS FRAMES
+ */
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
