@@ -61,31 +61,32 @@ function init(){
   }
 
   function pressMove(event){
-    event.target.x = event.stageX;
-    event.target.y = event.stageY;
+    if(!started){
+      event.target.x = event.stageX;
+      event.target.y = event.stageY;
 
-    var position = points.indexOf(event.target);
-    stage.removeChild(lines[position]);
+      var position = points.indexOf(event.target);
+      stage.removeChild(lines[position]);
 
-    var temp = points[position+1];
-    if((position+1) % vertexAmount == 0){
-      var temp2 = points[(position+1)-vertexAmount];
-      lines[position] = createLine(event.stageX, event.stageY, temp2.x, temp2.y);
-    }
-    else{
-      lines[position] = createLine(event.stageX, event.stageY, temp.x, temp.y);
-    }
+      var temp = points[position+1];
+      if((position+1) % vertexAmount == 0){
+        var temp2 = points[(position+1)-vertexAmount];
+        lines[position] = createLine(event.stageX, event.stageY, temp2.x, temp2.y);
+      }
+      else{
+        lines[position] = createLine(event.stageX, event.stageY, temp.x, temp.y);
+      }
 
-    if(position % vertexAmount == 0){
-      var pos = position-1+vertexAmount;
-      stage.removeChild(lines[pos]);
-      lines[pos] = createLine(points[pos].x, points[pos].y, event.stageX, event.stageY);
+      if(position % vertexAmount == 0){
+        var pos = position-1+vertexAmount;
+        stage.removeChild(lines[pos]);
+        lines[pos] = createLine(points[pos].x, points[pos].y, event.stageX, event.stageY);
+      }
+      else{
+        stage.removeChild(lines[position-1]);
+        lines[position-1] = createLine(points[position-1].x, points[position-1].y, event.stageX, event.stageY);
+      }
     }
-    else{
-      stage.removeChild(lines[position-1]);
-      lines[position-1] = createLine(points[position-1].x, points[position-1].y, event.stageX, event.stageY);
-    }
-
     updateCurves();
 
     stage.clear();
@@ -224,7 +225,7 @@ function init(){
 
     var numDC = parseInt(prompt("Número de avaliações que a curva deve ter:\n(min: 20)", 100));
 
-    while(numDC > 1000 || numDC < 20 || numDC == null || isNaN(numDC)){
+    while(numDC > 1500 || numDC < 20 || numDC == null || isNaN(numDC)){
       numDC = parseInt(prompt("ENTRADA INVÁLIDA\nNúmero de avaliações que a curva deve ter:\n(min: 20)", 100)) + 1;
     }
 
@@ -242,9 +243,9 @@ function init(){
       hideButton.click();
     }
 
-    hideButton.onclick = null;
-    clearButton.onclick = null;
-    doubleClick = null;
+    // hideButton.onclick = null;
+    // clearButton.onclick = null;
+    // doubleClick = null;
 
     stage.clear();
     stage.update();
@@ -253,6 +254,9 @@ function init(){
     red = 255, green = 90, blue = 90;
 
     animate(bezierCurves, numDC);
+
+    started = false;
+    red = 130, green = 130, blue = 130;
 
   }
 
