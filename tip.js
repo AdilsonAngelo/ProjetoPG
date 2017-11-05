@@ -51,7 +51,7 @@ function init(){
       for(var j = 0; j < polygons.length; j++){
         tempi.push(polygons[j].points[i]);
       }
-      tempi = bezier(tempi, 50);
+      tempi = bezier(tempi, 100);
       tempBezierCurves.push(tempi);
     }
 
@@ -330,10 +330,9 @@ function init(){
       stage.removeChild(linesBezier[linesBezier.length-1]);
     }
 
-    var counter = 0;
-    for(var k = 0; k < linesBezier.length; k++){
+    for(var counter = 0; linesBezier.length > 0; counter += vertexAmount){
       for(var j = 0; j < vertexAmount; j++){
-        stage.addChild(linesBezier[j+counter]);
+        stage.addChild(linesBezier[j]);
       }
       stage.clear();
       stage.update();
@@ -344,15 +343,14 @@ function init(){
       await sleep(timeout);
 
 
-      /*  PARA MAIS EFEITOS VISUAIS COMENTAR AS 3 LINHAS SEGUINTES  */
+      /*  PARA MAIS EFEITOS VISUAIS COMENTAR O LOOP SEGUINTE  */
       for(var j = 0; j < vertexAmount; j++){
-        stage.removeChild(linesBezier[j+counter]);
+        stage.removeChild(linesBezier.shift());
       }
-      stage.clear();
-      stage.update();
-
-      counter+=vertexAmount;
     }
+    stage.clear();
+    stage.update();
+    linesBezier = undefined;
   }
 
   /*
